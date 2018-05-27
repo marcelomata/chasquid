@@ -159,6 +159,26 @@ func TestMatchDomain(t *testing.T) {
 	}
 }
 
+func TestMXIsAllowed(t *testing.T) {
+	p := Policy{Version: "STSv1", Mode: "enforce", MaxAge: 1 * time.Hour,
+		MXs: []string{"mx1", "mx2"}}
+	if p.MXIsAllowed("notamx") {
+		t.Errorf("notamx should not be allowed")
+	}
+	if !p.MXIsAllowed("mx1") {
+		t.Errorf("mx1 should be allowed")
+	}
+	if !p.MXIsAllowed("mx2") {
+		t.Errorf("mx2 should be allowed")
+	}
+
+	p = Policy{Version: "STSv1", Mode: "testing", MaxAge: 1 * time.Hour,
+		MXs: []string{"mx1"}}
+	if !p.MXIsAllowed("notamx") {
+		t.Errorf("notamx should be allowed (policy not enforced)")
+	}
+}
+
 func TestFetch(t *testing.T) {
 	// Note the data "fetched" for each domain comes from policyForDomain,
 	// defined in TestMain above. See httpGet for more details.
